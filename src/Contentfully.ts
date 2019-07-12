@@ -142,7 +142,7 @@ export class Contentfully {
         return links;
     }
 
-    private _dereferenceLink(reference: any, links: any) {
+    private _dereferenceLink(reference: any, links: any, level: number=0) {
 
         const sys = reference.sys;
         const modelId = sys.id;
@@ -163,7 +163,7 @@ export class Contentfully {
             link._type = deferredSys.contentType.sys.id;
 
             // update entry with parsed value
-            assign(link, this._parseEntry(link._deferred, links));
+            assign(link, this._parseEntry(link._deferred, links, level));
 
             // prune deferral
             delete link._deferred;
@@ -174,7 +174,6 @@ export class Contentfully {
     }
 
     private _parseEntries(entries: any, links: any) {
-
         // convert entries to models and return result
         return map(entries, entry => {
             // process entry if not processed
@@ -203,22 +202,21 @@ export class Contentfully {
         });
     }
 
-    private _parseEntry(entry: any, links: any) {
-
+    private _parseEntry(entry: any, links: any, level: number=0 ) {
         // transform entry to model and return result
         forEach(entry.fields, (value, key) => {
             // parse array of values
             if (isArray(value)) {
-                entry.fields[key] = compact(map(value, item => this._parseValue(item, links)));
+                entry.fields[key] = compact(map(value, item => this._parseValue(item, links, level)));
             }
 
             // or parse value
             else {
                 // handle null values otherwise pass back the values
-                if(this._parseValue(value, links) === undefined) {
+                if(this._parseValue(value, links, level) === undefined) {
                     unset(entry.fields, key)
                 } else {
-                    entry.fields[key] = this._parseValue(value, links);
+                    entry.fields[key] = this._parseValue(value, links, level);
                 }
             }
         });
@@ -226,7 +224,10 @@ export class Contentfully {
         return entry.fields;
     }
 
-    private _parseValue(value: any, links: any) {
+    private _parseValue(value: any, links: any, level: number=0) {
+        level+=1;
+        if(level>=100)
+            return
 
         // handle values without a link
         const sys = value.sys;
@@ -235,6 +236,6 @@ export class Contentfully {
         }
 
         // dereference link
-        return this._dereferenceLink(value, links);
+        return this._dereferenceLink(value, links, level);
     }
 }
