@@ -203,6 +203,9 @@ export class Contentfully {
     }
 
     private _parseEntry(entry: any, links: any, level: number=0 ) {
+        level+=1;
+        if(level>=100)
+            return
         // transform entry to model and return result
         forEach(entry.fields, (value, key) => {
             // parse array of values
@@ -225,9 +228,6 @@ export class Contentfully {
     }
 
     private _parseValue(value: any, links: any, level: number=0) {
-        level+=1;
-        if(level>=100)
-            return
 
         // handle values without a link
         const sys = value.sys;
