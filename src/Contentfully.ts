@@ -204,8 +204,12 @@ export class Contentfully {
 
     private _parseEntry(entry: any, links: any, level: number=0 ) {
         level+=1;
-        if(level>=100)
+        // This Value has to be somewhat small, as it will otherwise 'detect' circular structures when there are none
+        //TODO: Make this configurable in the request (possibly by using the include property of the request)
+        if(level>=10)
             return
+
+
         // transform entry to model and return result
         forEach(entry.fields, (value, key) => {
             // parse array of values
