@@ -206,7 +206,10 @@ export class Contentfully {
         level+=1;
         // This Value has to be somewhat small, as it will otherwise 'detect' circular structures when there are none
         //TODO: Make this configurable in the request (possibly by using the include property of the request)
-        if(level>=10)
+        // It cuts off certain content if the level is <11. It wont work at 13 for unknown reasons and
+        // it won't work >15 because JSON.stringify will detect circular object structure, even though it isn't
+        // truly circular
+        if(level>=12)
             return
 
 
